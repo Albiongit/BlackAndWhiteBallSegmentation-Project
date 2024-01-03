@@ -1,5 +1,4 @@
-﻿
-class Program
+﻿class Program
 {
     static void Main()
     {
@@ -17,7 +16,7 @@ class Program
         List<Tuple<string, string, int, int>> combinations = GenerateCombinations(whiteSegments, blackSegments);
         HashSet<string> uniqueCombinations = new HashSet<string>();
 
-        Console.WriteLine("Valid Combinations - Static programming:");
+        Console.WriteLine("\nValid Combinations - Static programming:");
         foreach (var combination in combinations)
         {
             if (combination.Item1 == balls)
