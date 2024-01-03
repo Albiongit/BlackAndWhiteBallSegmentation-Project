@@ -17,7 +17,7 @@ class Program
         List<Tuple<string, string, int, int>> combinations = GenerateCombinations(whiteSegments, blackSegments);
         HashSet<string> uniqueCombinations = new HashSet<string>();
 
-        Console.WriteLine("Valid Combinations:");
+        Console.WriteLine("Valid Combinations - Static programming:");
         foreach (var combination in combinations)
         {
             if (combination.Item1 == balls)
@@ -29,6 +29,23 @@ class Program
         }
 
         Console.WriteLine(uniqueCombinations.Count);
+
+        Console.WriteLine("\nValid Combinations - Dynamic programming:");
+
+        List<Tuple<string, string, int, int>> combinationsDP = GenerateCombinationsDP(whiteSegments, blackSegments);
+        HashSet<string> uniqueCombinationsDP = new HashSet<string>();
+
+        foreach (var combination in combinationsDP)
+        {
+            if (combination.Item1 == balls)
+            {
+                string y = combination.Item2 + ", " + combination.Item3 + ", " + combination.Item4;
+                Console.WriteLine(y);
+                uniqueCombinationsDP.Add(y);
+            }
+        }
+
+        Console.WriteLine(uniqueCombinationsDP.Count);
     }
 
     static string TranslateToBalls(int[] input)
@@ -80,6 +97,8 @@ class Program
         }
     }
 
+    // Static programming
+    // Time complexity is O(2^(whites + blacks)), Space complexity is O(whites + blacks) + stack
     static List<Tuple<string, string, int, int>> GenerateCombinations(List<string> whites, List<string> blacks)
     {
         List<Tuple<string, string, int, int>> combinations = new List<Tuple<string, string, int, int>>();
@@ -107,5 +126,47 @@ class Program
 
         // Cover all possibilities
         GenerateCombinationsHelper(currentCombination, currentCombinationTranslated, index + 1, whiteSegments, blackSegments, whites, blacks, combinations);
+    }
+
+    // Dynamic programming
+    // Time complexity is O(whites * blacks), Space complexity is O(whites * blacks) + stack
+    static List<Tuple<string, string, int, int>> GenerateCombinationsDP(List<string> whites, List<string> blacks)
+    {
+        Dictionary<Tuple<string, string, int, int>, bool> memo = new Dictionary<Tuple<string, string, int, int>, bool>();
+        List<Tuple<string, string, int, int>> combinations = new List<Tuple<string, string, int, int>>();
+        GenerateCombinationsHelperDP("", "", 0, 0, 0, whites, blacks, combinations, memo);
+
+        return combinations;
+    }
+
+    static void GenerateCombinationsHelperDP(string currentCombination, string currentCombinationTranslated, int index, int whiteSegments, int blackSegments, List<string> whites, List<string> blacks, List<Tuple<string, string, int, int>> combinations, Dictionary<Tuple<string, string, int, int>, bool> memo)
+    {
+        if (index == whites.Count + blacks.Count)
+        {
+            combinations.Add(new Tuple<string, string, int, int>(currentCombination, currentCombinationTranslated, whiteSegments, blackSegments));
+            return;
+        }
+
+        // Check if the state has been memoized
+        var currentState = new Tuple<string, string, int, int>(currentCombination, currentCombinationTranslated, whiteSegments, blackSegments);
+        if (memo.ContainsKey(currentState))
+        {
+            return;
+        }
+
+        if (index < whites.Count)
+        {
+            GenerateCombinationsHelperDP(currentCombination + whites[index], currentCombinationTranslated + ", " + whites[index], index + 1, whiteSegments + 1, blackSegments, whites, blacks, combinations, memo);
+        }
+        if (index < blacks.Count)
+        {
+            GenerateCombinationsHelperDP(currentCombination + blacks[index], currentCombinationTranslated + ", " + blacks[index], index + 1, whiteSegments, blackSegments + 1, whites, blacks, combinations, memo);
+        }
+
+        // Cover all possibilities
+        GenerateCombinationsHelperDP(currentCombination, currentCombinationTranslated, index + 1, whiteSegments, blackSegments, whites, blacks, combinations, memo);
+
+        // Memoize the current state
+        memo[currentState] = true;
     }
 }
